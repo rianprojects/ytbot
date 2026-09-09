@@ -1,0 +1,37 @@
+* {
+  font-family: 'Outfit', sans-serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: scaleY(0); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+@keyframes bgPan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+.slide-down {
+  animation: slideDown 0.25s ease-out;
+  transform-origin: top;
+}
+.glass {
+  background: rgba(24, 24, 27, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(113, 113, 122, 0.15);
+}
+.glow-red {
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.25);
+}
+.animated-bg {
+  background: linear-gradient(120deg, #09090b, #000000, #450a0a, #09090b);
+  background-size: 300% 300%;
+  animation: bgPan 15s ease infinite;
+}

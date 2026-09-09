@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Outfit', sans-serif;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: scaleY(0); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        .slide-down {
+            animation: slideDown 0.25s ease-out;
+            transform-origin: top;
+        }
+        .glass {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(113, 113, 122, 0.15);
+        }
+        .glow-red {
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-zinc-950 via-black to-red-950/20 text-white min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-in">
+            <h1 class="text-4xl font-bold mb-2 text-white">
+                <span class="text-red-500">YouTube</span> Downloader
+            </h1>
+            <p class="text-zinc-400 text-sm">Download video 4K & audio MP3 instan</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="mb-8 fade-in" style="animation-delay: 0.05s;">
+            <div class="glass rounded-lg p-4 glow-red">
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="urlInput" 
+                        placeholder="Paste URL..." 
+                        class="flex-1 bg-zinc-900/60 border border-zinc-700/40 rounded px-3 py-2 text-white placeholder-zinc-500/60 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 transition text-sm"
+                    >
+                    <button 
+                        id="searchBtn"
+                        onclick="fetchVideoInfo()" 
+                        class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-semibold transition text-sm flex items-center gap-1.5"
+                    >
+                        <i class="fas fa-search text-xs"></i>Get
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="hidden">
+            <!-- Video Info Card -->
+            <div id="videoCard" class="glass rounded-lg overflow-hidden mb-6 glow-red fade-in slide-down">
+                <div class="relative bg-black h-56 overflow-hidden group">
+                    <img id="thumbnail" src="" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4">
+                        <h2 id="videoTitle" class="text-lg font-bold line-clamp-2 mb-1 text-white"></h2>
+                        <div class="flex items-center gap-2">
+                            <p id="channelName" class="text-zinc-300 text-xs font-medium"></p>
+                            <span id="duration" class="bg-red-600 px-2 py-0.5 rounded text-xs font-semibold">--:--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <div class="bg-zinc-800/50 rounded p-2 text-center">
+                            <p class="text-zinc-400 text-xs">Views</p>
+                            <p id="views" class="text-sm font-bold text-red-400 mt-0.5">0</p>
+                        </div>
+                        <div class="bg-zinc-800/50 rounded p-2 text-center">
+                            <p class="text-zinc-400 text-xs">Upload</p>
+                            <p id="uploadDate" class="text-sm font-bold text-red-400 mt-0.5">--</p>
+                        </div>
+                        <div class="bg-zinc-800/50 rounded p-2 text-center">
+                            <p class="text-zinc-400 text-xs">Quality</p>
+                            <p class="text-sm font-bold text-red-400 mt-0.5">8K</p>
+                        </div>
+                    </div>
+
+                    <!-- Download Tabs -->
+                    <div class="flex gap-1 mb-4 bg-zinc-800/40 p-1 rounded w-fit">
+                        <button 
+                            onclick="switchTab('video')" 
+                            id="videoTab"
+                            class="px-4 py-1.5 font-semibold text-white bg-red-600 rounded transition text-sm flex items-center gap-1.5"
+                        >
+                            <i class="fas fa-film text-xs"></i>Video
+                        </button>
+                        <button 
+                            onclick="switchTab('audio')" 
+                            id="audioTab"
+                            class="px-4 py-1.5 font-semibold text-zinc-400 hover:text-white transition text-sm flex items-center gap-1.5"
+                        >
+                            <i class="fas fa-music text-xs"></i>Audio
+                        </button>
+                    </div>
+
+                    <!-- Video Downloads -->
+                    <div id="videoSection" class="space-y-3">
+                        <!-- Video options will be inserted here -->
+                    </div>
+
+                    <!-- Audio Downloads -->
+                    <div id="audioSection" class="hidden space-y-3">
+                        <!-- Audio options will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12">
+            <div class="text-5xl mb-4 text-red-600/20">
+                <i class="fas fa-circle-play"></i>
+            </div>
+            <p class="text-zinc-400 text-sm">Masukkan link untuk mulai download</p>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'video';
+        const mockData = {
+            title: "Contoh Video YouTube",
+            channel: "Channel Name",
+            thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+            duration: "3:32",
+            views: "1.2M",
+            uploadDate: "Jan 15, 2024",
+            formats: {
+                video: [
+                    { resolution: "1080p", fps: "60", size: "250 MB", codec: "h.264", bitrate: "5 Mbps" },
+                    { resolution: "1080p", fps: "30", size: "180 MB", codec: "h.264", bitrate: "3.5 Mbps" },
+                    { resolution: "720p", fps: "60", size: "120 MB", codec: "h.264", bitrate: "2.5 Mbps" },
+                    { resolution: "720p", fps: "30", size: "85 MB", codec: "h.264", bitrate: "1.8 Mbps" },
+                    { resolution: "480p", fps: "30", size: "45 MB", codec: "h.264", bitrate: "1 Mbps" },
+                    { resolution: "360p", fps: "30", size: "25 MB", codec: "h.264", bitrate: "0.6 Mbps" }
+                ],
+                audio: [
+                    { bitrate: "320 kbps", format: "MP3", size: "8.5 MB" },
+                    { bitrate: "256 kbps", format: "MP3", size: "6.8 MB" },
+                    { bitrate: "192 kbps", format: "MP3", size: "5.1 MB" },
+                    { bitrate: "128 kbps", format: "MP3", size: "3.4 MB" }
+                ]
+            }
+        };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            if (tab === 'video') {
+                document.getElementById('videoTab').classList.remove('text-zinc-400');
+                document.getElementById('videoTab').classList.add('bg-red-600', 'text-white');
+                document.getElementById('audioTab').classList.add('text-zinc-400');
+                document.getElementById('audioTab').classList.remove('bg-red-600');
+                document.getElementById('videoSection').classList.remove('hidden');
+                document.getElementById('audioSection').classList.add('hidden');
+            } else {
+                document.getElementById('audioTab').classList.remove('text-zinc-400');
+                document.getElementById('audioTab').classList.add('bg-red-600', 'text-white');
+                document.getElementById('videoTab').classList.add('text-zinc-400');
+                document.getElementById('videoTab').classList.remove('bg-red-600');
+                document.getElementById('audioSection').classList.remove('hidden');
+                document.getElementById('videoSection').classList.add('hidden');
+            }
+        }
+
+        function fetchVideoInfo() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                alert('Masukkan URL YouTube');
+                return;
+            }
+
+            // Mock data display
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+
+            document.getElementById('thumbnail').src = mockData.thumbnail;
+            document.getElementById('videoTitle').textContent = mockData.title;
+            document.getElementById('channelName').textContent = mockData.channel;
+            document.getElementById('duration').textContent = mockData.duration;
+            document.getElementById('views').textContent = mockData.views;
+            document.getElementById('uploadDate').textContent = mockData.uploadDate;
+
+            // Render video formats
+            const videoSection = document.getElementById('videoSection');
+            videoSection.innerHTML = mockData.formats.video.map((format, idx) => `
+                <div class="bg-zinc-800/50 hover:bg-zinc-800/70 border border-zinc-700/50 hover:border-red-600/40 rounded p-3 flex justify-between items-center cursor-pointer transition slide-down" style="animation-delay: ${idx * 30}ms;">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-red-600/30 text-red-300 px-2 py-0.5 rounded text-xs font-semibold">${format.resolution}</span>
+                            <span class="text-white text-xs font-medium">${format.fps}fps</span>
+                        </div>
+                        <p class="text-xs text-zinc-400">${format.codec} • ${format.bitrate} • ${format.size}</p>
+                    </div>
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded font-semibold transition text-xs ml-3 whitespace-nowrap flex items-center gap-1">
+                        <i class="fas fa-download text-xs"></i>Get
+                    </button>
+                </div>
+            `).join('');
+
+            // Render audio formats
+            const audioSection = document.getElementById('audioSection');
+            audioSection.innerHTML = mockData.formats.audio.map((format, idx) => `
+                <div class="bg-zinc-800/50 hover:bg-zinc-800/70 border border-zinc-700/50 hover:border-red-600/40 rounded p-3 flex justify-between items-center cursor-pointer transition slide-down" style="animation-delay: ${idx * 30}ms;">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-red-600/30 text-red-300 px-2 py-0.5 rounded text-xs font-semibold">${format.format}</span>
+                            <span class="text-white text-xs font-medium">${format.bitrate}</span>
+                        </div>
+                        <p class="text-xs text-zinc-400">${format.size}</p>
+                    </div>
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded font-semibold transition text-xs ml-3 whitespace-nowrap flex items-center gap-1">
+                        <i class="fas fa-download text-xs"></i>Get
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Enter key support
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchVideoInfo();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+client/dist/
+electron/build/
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp
+tmp/
+temp/
+*.tmp
